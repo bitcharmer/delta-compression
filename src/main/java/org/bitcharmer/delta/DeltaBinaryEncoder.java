@@ -4,9 +4,7 @@ import java.nio.ByteBuffer;
 
 import static java.lang.Math.abs;
 
-/**
- * Created by kudlaw on 02/06/14.
- */
+
 public abstract class DeltaBinaryEncoder<T> extends BinaryEncoder<T> {
 
     public DeltaBinaryEncoder(final int precision) {
@@ -39,56 +37,24 @@ public abstract class DeltaBinaryEncoder<T> extends BinaryEncoder<T> {
         final int bitsTotal = (length - idx) * deltaBits;
         int bitsWritten = 0;
         int bitsRemaining;
-        long ascMask = ascending ? -1 : 0; // all 1s if ascending, all 0s if descending
+        long ascMask = ascending ? -1 : 0;
 
         while ((bitsRemaining = bitsTotal - bitsWritten) > 0) {
             long binary = 0L;
             if (bitsRemaining > Integer.SIZE || deltaBits > Integer.SIZE) {
                 for (int shift = Long.SIZE - deltaBits; shift >= 0 && bitsWritten < bitsTotal; shift -= deltaBits, bitsWritten += deltaBits) {
-                    long val = roundAndPromote(get(idx++, array));
-                    long delta = val - ref;
-                    long deltaMask = -(delta >>> 63);  // all 0s if delta positive
-                    long fullMask = deltaMask ^ ascMask;  // gives 1s for +delta asc, -delta desc, else 0s
-                    // the above is equivalent to: if( (delta<0 && ascending) || (delta>=0 && !ascending) )   delta = 0;
-                    long lossyDelta = delta & fullMask;
-                    binary |=  abs(lossyDelta) << shift;
-                    ref += lossyDelta;
+                    final long signedDelta = roundAndPromote(get(idx++, array)) - ref;
+                    final long unsignedDelta = signedDelta & (-(signedDelta >>> 63) ^ ascMask);
+                    binary |=  abs(unsignedDelta) << shift;
+                    ref += unsignedDelta;
                 }
                 buffer.putLong(binary);
-            } else if (bitsRemaining > Short.SIZE || deltaBits > Short.SIZE) {
-                for (int shift = Integer.SIZE - deltaBits; shift >= 0 && bitsWritten < bitsTotal; shift -= deltaBits, bitsWritten += deltaBits) {
-                    long val = roundAndPromote(get(idx++, array));
-                    long delta = val - ref;
-                    long deltaMask = -(delta >>> 63);  // all 0s if delta positive
-                    long fullMask = deltaMask ^ ascMask;  // gives 1s for +delta asc, -delta desc, else 0s
-                    // the above is equivalent to: if( (delta<0 && ascending) || (delta>=0 && !ascending) )   delta = 0;
-                    long lossyDelta = delta & fullMask;
-                    binary |=  abs(lossyDelta) << shift;
-                    ref += lossyDelta;
-                }
-                buffer.putInt((int) binary);
-            } else if (bitsRemaining > Byte.SIZE || deltaBits > Byte.SIZE) {
-                for (int shift = Short.SIZE - deltaBits; shift >= 0 && bitsWritten < bitsTotal; shift -= deltaBits, bitsWritten += deltaBits) {
-                    long val = roundAndPromote(get(idx++, array));
-                    long delta = val - ref;
-                    long deltaMask = -(delta >>> 63);  // all 0s if delta positive
-                    long fullMask = deltaMask ^ ascMask;  // gives 1s for +delta asc, -delta desc, else 0s
-                    // the above is equivalent to: if( (delta<0 && ascending) || (delta>=0 && !ascending) )   delta = 0;
-                    long lossyDelta = delta & fullMask;
-                    binary |=  abs(lossyDelta) << shift;
-                    ref += lossyDelta;
-                }
-                buffer.putShort((short) binary);
-            }  else {
+            } else {
                 for (int shift = Byte.SIZE - deltaBits; shift >= 0 && bitsWritten < bitsTotal; shift -= deltaBits, bitsWritten += deltaBits) {
-                    long val = roundAndPromote(get(idx++, array));
-                    long delta = val - ref;
-                    long deltaMask = -(delta >>> 63);  // all 0s if delta positive
-                    long fullMask = deltaMask ^ ascMask;  // gives 1s for +delta asc, -delta desc, else 0s
-                    // the above is equivalent to: if( (delta<0 && ascending) || (delta>=0 && !ascending) )   delta = 0;
-                    long lossyDelta = delta & fullMask;
-                    binary |=  abs(lossyDelta) << shift;
-                    ref += lossyDelta;
+                    final long signedDelta = roundAndPromote(get(idx++, array)) - ref;
+                    final long unsignedDelta = signedDelta & (-(signedDelta >>> 63) ^ ascMask);
+                    binary |=  abs(unsignedDelta) << shift;
+                    ref += unsignedDelta;
                 }
                 buffer.put((byte) binary);
             }

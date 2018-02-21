@@ -2,9 +2,7 @@ package org.bitcharmer.delta;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by kudlaw on 02/06/14.
- */
+
 public abstract class ValueBinaryEncoder<T> extends BinaryEncoder<T> {
 
     public ValueBinaryEncoder(final int precision) {

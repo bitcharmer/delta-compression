@@ -8,8 +8,8 @@ public interface BinaryEncoding {
         Field                   Size in bits      Type            Description
         -------------------------------------------------------------------------------------------------
         Array length            8                 byte            Number of encoded elements
-        Precision               4                 1 nibble        Number of decimal places used
-        Element size in bits    12                3 nibbles      Number of bits to store a single element
+        Precision               4                 1 nibble        Number of decimal places preserved
+        Element size in bits    12                3 nibbles       Number of bits used to store a single element
         Reference value         64                long            Optional - only for delta encoding
 
      */

@@ -2,9 +2,7 @@ package org.bitcharmer.delta;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by kudlaw on 02/06/14.
- */
+
 public abstract class ValueBinaryDecoder<T> extends BinaryDecoder<T> {
 
     protected void populateResult(final ByteBuffer buffer, final T array, final int length,
